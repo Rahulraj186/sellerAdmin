@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart</title>
+  <style>
+    #cart {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Shopping Cart</h1>
+
+  <form id="productForm">
+    <label for="productName">Product Name:</label>
+    <input type="text" id="productName" required>
+
+    <label for="sellingPrice">Selling Price:</label>
+    <input type="number" id="sellingPrice" required>
+
+    <button type="button" onclick="addToCart()">Add to Cart</button>
+  </form>
+
+  <div id="cart">
+    <h2>Products</h2>
+    <ul id="cartList"></ul>
+    <p>Total Value: $<span id="totalValue">0</span></p>
+  </div>
+
+  <script>
+    // Function to add product to the cart
+    function addToCart() {
+      var productName = document.getElementById('productName').value;
+      var sellingPrice = parseFloat(document.getElementById('sellingPrice').value);
+
+      // Validate input
+      if (!productName || isNaN(sellingPrice) || sellingPrice <= 0) {
+        alert('Please enter valid product details.');
+        return;
+      }
+
+      // Get existing cart items from local storage
+      var cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+
+      // Add new item to the cart
+      var newItem = { id: Date.now(), productName: productName, sellingPrice: sellingPrice };
+      cartItems.push(newItem);
+
+      // Save updated cart items to local storage
+      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+
+      // Update cart display
+      updateCartDisplay();
+    }
+
+    // Function to delete product from the cart
+    function deleteFromCart(id) {
+      // Get existing cart items from local storage
+      var cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+
+      // Find index of the item to be deleted
+      var indexToDelete = cartItems.findIndex(item => item.id === id);
+
+      // Remove item from the cart
+      if (indexToDelete !== -1) {
+        cartItems.splice(indexToDelete, 1);
+
+        // Save updated cart items to local storage
+        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+
+        // Update cart display
+        updateCartDisplay();
+      }
+    }
+
+    // Function to update the cart display
+    function updateCartDisplay() {
+      var cartList = document.getElementById('cartList');
+      var totalValueElement = document.getElementById('totalValue');
+
+      // Clear previous cart items
+      cartList.innerHTML = '';
+
+      // Get cart items from local storage
+      var cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+
+      // Display each item in the cart
+      var totalValue = 0;
+      cartItems.forEach(function(item) {
+        var listItem = document.createElement('li');
+        listItem.textContent = item.productName + ' - $' + item.sellingPrice.toFixed(2);
+
+        // Create delete button
+        var deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.onclick = function() {
+          deleteFromCart(item.id);
+        };
+
+        listItem.appendChild(deleteButton);
+        cartList.appendChild(listItem);
+
+        // Calculate total value
+        totalValue += item.sellingPrice;
+      });
+
+      // Display total value
+      totalValueElement.textContent = totalValue.toFixed(2);
+    }
+
+    // Initial cart display
+    updateCartDisplay();
+  </script>
+
+</body>
+</html>
